@@ -44,6 +44,24 @@ const CHALLENGE_COMMAND = {
   contexts: [0, 2],
 };
 
-const ALL_COMMANDS = [TEST_COMMAND, CHALLENGE_COMMAND];
+const COMMAND = {
+  name: 'configurar_bosses_nc',
+  description: 'Configurar os horários dos bosses',
+  type: 1
+}
 
-InstallGlobalCommands(process.env.APP_ID, ALL_COMMANDS);
+const CONSULTAR_BOSSES = {
+  name: 'consultar_bosses',
+  description: 'Consultar os horários dos bosses salvos',
+  type: 1
+};
+
+const LIMPAR_BOSSES = {
+  name: 'limpar',
+  description: 'Consultar os horários dos bosses salvos',
+  type: 1
+};
+
+const ALL_COMMANDS = [TEST_COMMAND, CHALLENGE_COMMAND, COMMAND, CONSULTAR_BOSSES, LIMPAR_BOSSES];
+
+InstallGlobalCommands(process.env.APP_ID, process.env.GUILD_ID, ALL_COMMANDS);
