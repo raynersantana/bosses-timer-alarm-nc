@@ -40,6 +40,8 @@ function agendarEventos(channelId, eventos) {
     const diffMs = dataEvento.toMillis() - agora.toMillis();
     const avisoMs = diffMs - 15 * 60 * 1000;
 
+    console.log(`Horário do ${evento.nome} será daqui a ${avisoMs} em ms!`);
+
     if (avisoMs > 0) {
       setTimeout(() => {
         DiscordRequest(`/channels/${channelId}/messages`, {
