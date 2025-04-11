@@ -1,6 +1,7 @@
 import { setTimeout } from 'node:timers';
 import { DiscordRequest } from './utils.js';
-import { carregarEventos, eventosPorUsuario } from './eventos.js';
+import { carregarEventos, eventosPorCanal } from './eventos.js';
+import { DateTime } from 'luxon';
 
 function extrairEventos(texto) {
   const linhas = texto.split('\n');
@@ -21,44 +22,44 @@ function extrairEventos(texto) {
   return eventos;
 }
 
-
-function agendarEventos(userId, eventos) {
-  const canalId = process.env.CHANNEL_ID;
-  const agora = new Date();
-  console.log("data de hoje: " + agora);
+function agendarEventos(channelId, eventos) {
+  const agora = DateTime.now().setZone('America/Sao_Paulo');
 
   eventos.forEach(evento => {
-    console.log("Objeto eventos: " + JSON.stringify(evento))
     const [dia, mes] = evento.data.split('/');
     const [hora, minuto] = evento.hora.split(':');
-    const dataEvento = new Date(agora.getFullYear(), mes - 1, dia, hora, minuto);
 
-    const diffMs = dataEvento - agora;
-    const avisoMs = diffMs - 15 * 60 * 1000; // 15 minutos antes
-    console.log("diffMs: " + diffMs);
-    console.log("Timeout setado para alertar: " + avisoMs);
+    const dataEvento = DateTime.fromObject({
+      year: agora.year,
+      month: Number(mes),
+      day: Number(dia),
+      hour: Number(hora),
+      minute: Number(minuto),
+    }, { zone: 'America/Sao_Paulo' });
+
+    const diffMs = dataEvento.toMillis() - agora.toMillis();
+    const avisoMs = diffMs - 15 * 60 * 1000;
 
     if (avisoMs > 0) {
       setTimeout(() => {
-        DiscordRequest(`/channels/${canalId}/messages`, {
+        DiscordRequest(`/channels/${channelId}/messages`, {
           method: 'POST',
           body: {
             content: `@everyone Boss **${evento.nome}** começa em 15 minutos!`,
           },
         });
 
-        // Remove o evento da lista
-        if (eventosPorUsuario[userId]) {
-          eventosPorUsuario[userId] = eventosPorUsuario[userId].filter(e => {
+        // Remover evento da lista do canal
+        if (eventosPorCanal[channelId]) {
+          eventosPorCanal[channelId] = eventosPorCanal[channelId].filter(e => {
             return !(e.nome === evento.nome && e.data === evento.data && e.hora === evento.hora);
           });
         }
 
       }, avisoMs);
-    }else {
-      console.log("Ainda não está na hora. " + dataEvento);
     }
   });
 }
+
 
 export { extrairEventos, agendarEventos };

@@ -22,7 +22,8 @@ const INTERACAO_USUARIO = {}; // { userId: true }
 
 app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (req, res) {
   const { id, type, data, member } = req.body;
-  const userId = member?.user?.id;
+  const channelId = req.body.channel_id;
+  const userId = req.body.member?.user?.id;
 
   // Verifica se é só um PING do Discord
   if (type === InteractionType.PING) {
@@ -45,9 +46,7 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
     }
 
     if (name === 'limpar') {
-      const userId = member?.user?.id;
-    
-      limparEventos(userId);
+      limparEventos(channelId);
     
       return res.send({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -84,7 +83,7 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
     }
 
     if (name === 'consultar_bosses') {
-      const eventos = carregarEventos(userId);
+      const eventos = carregarEventos(channelId);
     
       if (!eventos || eventos.length === 0) {
         return res.send({
@@ -139,8 +138,8 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
       });
     }
   
-    salvarEventos(userId, eventos);
-    agendarEventos(userId, eventos);
+    salvarEventos(channelId, eventos);
+    agendarEventos(channelId, eventos);
   
     const lista = eventos.map(e => `${e.nome} - ${e.data} - ${e.hora}`).join('\n');
   
@@ -175,13 +174,13 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
       });
     }
 
-    salvarEventos(userId, eventos);
+    salvarEventos(channelId, eventos);
     INTERACAO_USUARIO[userId] = false;
 
     const lista = eventos.map(e => `${e.nome} - ${e.data} - ${e.hora}`).join('\n');
     
     console.log("Iniciar agendamento de eventos!");
-    agendarEventos(userId, eventos);
+    agendarEventos(channelId, eventos);
 
     return res.send({
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,

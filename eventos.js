@@ -1,28 +1,28 @@
-const eventosPorUsuario = {};
+const eventosPorCanal = {};
 
 /**
  * Salva eventos para um usuário específico
  */
-function salvarEventos(userId, eventos) {
-    if (!eventosPorUsuario[userId]) {
-      eventosPorUsuario[userId] = [];
-    }
-  
-    eventosPorUsuario[userId].push(...eventos);
-  }  
+function salvarEventos(channelId, eventos) {
+  if (!eventosPorCanal[channelId]) {
+    eventosPorCanal[channelId] = [];
+  }
+
+  eventosPorCanal[channelId].push(...eventos);
+}
 
 /**
  * Carrega os eventos salvos de um usuário
  */
-function carregarEventos(userId) {
-  return eventosPorUsuario[userId] || [];
+function carregarEventos(channelId) {
+  return eventosPorCanal[channelId] || [];
 }
 
 /**
  * Limpa todos os eventos salvos de um usuário
  */
-function limparEventos(userId) {
-  delete eventosPorUsuario[userId];
+function limparEventos(channelId) {
+  delete eventosPorCanal[channelId];
 }
 
-export { salvarEventos, carregarEventos, limparEventos, eventosPorUsuario };
+export { salvarEventos, carregarEventos, limparEventos, eventosPorCanal };
