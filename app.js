@@ -13,11 +13,15 @@ import { salvarEventos, carregarEventos, limparEventos, removerEventoEspecifico 
 // App config
 const app = express();
 const PORT = process.env.PORT || 3000;
-app.use('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY)); // Primeira coisa
+// app.use('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY)); // Primeira coisa
 
 const INTERACAO_USUARIO = {}; // { userId: true }
 
-app.post('/interactions', express.json(), async function (req, res) {
+app.post(
+  '/interactions',
+  verifyKeyMiddleware(process.env.PUBLIC_KEY), // valida a assinatura
+  express.json(), // agora pode fazer o parsing
+  async function (req, res) {
   const { id, type, data, member } = req.body;
   const channelId = req.body.channel_id;
   const userId = req.body.member?.user?.id;
