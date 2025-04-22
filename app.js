@@ -1,6 +1,5 @@
 import 'dotenv/config';
 import express from 'express';
-import { verifyDiscordRequest } from './utils.js';
 import {
   InteractionResponseFlags,
   InteractionResponseType,
@@ -14,14 +13,11 @@ import { salvarEventos, carregarEventos, limparEventos, removerEventoEspecifico 
 // App config
 const app = express();
 const PORT = process.env.PORT || 3000;
-// app.use(express.json());
-app.use('/interactions', express.json({
-  verify: verifyDiscordRequest
-}));
+app.use('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY)); // Primeira coisa
 
 const INTERACAO_USUARIO = {}; // { userId: true }
 
-app.post('/interactions', async (req, res) => {
+app.post('/interactions', express.json(), async function (req, res) {
   const { id, type, data, member } = req.body;
   const channelId = req.body.channel_id;
   const userId = req.body.member?.user?.id;
