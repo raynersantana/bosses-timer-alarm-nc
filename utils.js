@@ -25,9 +25,9 @@ export async function DiscordRequest(endpoint, options) {
   return res;
 }
 
-export async function InstallGlobalCommands(appId, guildId, commands) {
+export async function InstallGlobalCommands(appId, commands) {
   // API endpoint to overwrite global commands
-  const endpoint = `applications/${appId}/guilds/${guildId}/commands`;
+  const endpoint = `applications/${appId}/commands`;
 
   try {
     // This is calling the bulk overwrite endpoint: https://discord.com/developers/docs/interactions/application-commands#bulk-overwrite-global-application-commands

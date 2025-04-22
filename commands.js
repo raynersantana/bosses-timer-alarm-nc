@@ -78,4 +78,4 @@ const REMOVER_BOSS = {
 
 const ALL_COMMANDS = [TEST_COMMAND, CHALLENGE_COMMAND, COMMAND, CONSULTAR_BOSSES, LIMPAR_BOSSES, REMOVER_BOSS];
 
-InstallGlobalCommands(process.env.APP_ID, process.env.GUILD_ID, ALL_COMMANDS);
+InstallGlobalCommands(process.env.APP_ID, ALL_COMMANDS);
