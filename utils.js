@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { verifyKey } from 'discord-interactions';
 
 export async function DiscordRequest(endpoint, options) {
   // append endpoint to root API URL
@@ -44,4 +45,15 @@ export function getRandomEmoji() {
 
 export function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+export function verifyDiscordRequest(req, res, buf, encoding) {
+  const signature = req.get('X-Signature-Ed25519');
+  const timestamp = req.get('X-Signature-Timestamp');
+
+  const isValidRequest = verifyKey(buf, signature, timestamp, process.env.PUBLIC_KEY);
+  if (!isValidRequest) {
+    res.status(401).send('Bad request signature');
+    throw new Error('Bad request signature');
+  }
 }

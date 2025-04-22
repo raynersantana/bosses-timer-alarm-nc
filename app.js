@@ -1,26 +1,27 @@
 import 'dotenv/config';
 import express from 'express';
+import { verifyDiscordRequest } from './utils.js';
 import {
-  ButtonStyleTypes,
   InteractionResponseFlags,
   InteractionResponseType,
   InteractionType,
-  MessageComponentTypes,
   verifyKeyMiddleware,
 } from 'discord-interactions';
-import { getRandomEmoji, DiscordRequest } from './utils.js';
-import { getShuffledOptions, getResult } from './game.js';
+import { getRandomEmoji } from './utils.js';
 import { extrairEventos, agendarEventos } from './utils_bot.js';
-import { salvarEventos, carregarEventos, limparEventos } from './eventos.js';
+import { salvarEventos, carregarEventos, limparEventos, removerEventoEspecifico } from './eventos.js';
 
 // App config
 const app = express();
 const PORT = process.env.PORT || 3000;
-app.use(express.json());
+// app.use(express.json());
+app.use('/interactions', express.json({
+  verify: verifyDiscordRequest
+}));
 
 const INTERACAO_USUARIO = {}; // { userId: true }
 
-app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (req, res) {
+app.post('/interactions', async (req, res) => {
   const { id, type, data, member } = req.body;
   const channelId = req.body.channel_id;
   const userId = req.body.member?.user?.id;
@@ -55,6 +56,32 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
         },
       });
     }
+
+    if (name === 'remover_boss') {
+      const nomeBoss = data.options.find(opt => opt.name === 'nome')?.value;
+      const channelId = req.body.channel?.id;
+    
+      if (!channelId) {
+        return res.send({
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: {
+            content: '❌ Não foi possível identificar o canal.',
+            flags: InteractionResponseFlags.EPHEMERAL,
+          },
+        });
+      }
+    
+      removerEventoEspecifico(channelId, nomeBoss);
+    
+      return res.send({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          content: `✅ Boss **${nomeBoss}** removido da lista.`,
+          flags: InteractionResponseFlags.EPHEMERAL,
+        },
+      });
+    }
+    
 
     if (name === 'configurar_bosses_nc') {
 
@@ -96,7 +123,7 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
       }
     
       const lista = eventos
-        .map(e => `${e.nome} - ${e.data} - ${e.hora}`)
+        .map(e => `${e.nome} - ${e.data} - ${e.hora} - ${e.servidor}`)
         .join('\n');
     
       return res.send({
@@ -141,7 +168,7 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
     salvarEventos(channelId, eventos);
     agendarEventos(channelId, eventos);
   
-    const lista = eventos.map(e => `${e.nome} - ${e.data} - ${e.hora}`).join('\n');
+    const lista = eventos.map(e => `${e.nome} - ${e.data} - ${e.hora} - ${e.servidor}`).join('\n');
   
     return res.send({
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -177,7 +204,7 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
     salvarEventos(channelId, eventos);
     INTERACAO_USUARIO[userId] = false;
 
-    const lista = eventos.map(e => `${e.nome} - ${e.data} - ${e.hora}`).join('\n');
+    const lista = eventos.map(e => `${e.nome} - ${e.data} - ${e.hora} - ${e.servidor}`).join('\n');
     
     console.log("Iniciar agendamento de eventos!");
     agendarEventos(channelId, eventos);

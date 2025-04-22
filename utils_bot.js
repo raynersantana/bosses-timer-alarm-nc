@@ -1,6 +1,6 @@
 import { setTimeout } from 'node:timers';
 import { DiscordRequest } from './utils.js';
-import { carregarEventos, eventosPorCanal } from './eventos.js';
+import { carregarEventos, eventosPorCanal, removerEventoEspecifico } from './eventos.js';
 import { DateTime } from 'luxon';
 
 function extrairEventos(texto) {
@@ -9,14 +9,14 @@ function extrairEventos(texto) {
 
   for (const linha of linhas) {
     const partes = linha.split(' - ');
-    if (partes.length !== 3) continue;
+    if (partes.length !== 4) continue;
 
-    const [nome, data, hora] = partes.map(p => p.trim());
+    const [nome, data, hora, servidor] = partes.map(p => p.trim());
 
     // Validações básicas
-    if (!nome || !data || !hora) continue;
+    if (!nome || !data || !hora || !servidor) continue;
 
-    eventos.push({ nome, data, hora });
+    eventos.push({ nome, data, hora, servidor });
   }
 
   return eventos;
@@ -47,16 +47,12 @@ function agendarEventos(channelId, eventos) {
         DiscordRequest(`/channels/${channelId}/messages`, {
           method: 'POST',
           body: {
-            content: `@everyone Boss **${evento.nome}** começa em 15 minutos!`,
+            content: `@everyone Boss **${evento.nome}** começa em 15 minutos!\n\nLembrando que esse Boss é do **${evento.servidor}**`,
           },
         });
 
         // Remover evento da lista do canal
-        if (eventosPorCanal[channelId]) {
-          eventosPorCanal[channelId] = eventosPorCanal[channelId].filter(e => {
-            return !(e.nome === evento.nome && e.data === evento.data && e.hora === evento.hora);
-          });
-        }
+        removerEventoEspecifico(channelId, evento.nome)
 
       }, avisoMs);
     }

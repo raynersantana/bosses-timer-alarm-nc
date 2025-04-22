@@ -25,4 +25,14 @@ function limparEventos(channelId) {
   delete eventosPorCanal[channelId];
 }
 
-export { salvarEventos, carregarEventos, limparEventos, eventosPorCanal };
+//Deleta evento específico
+function removerEventoEspecifico(channelId, nomeBoss) {
+  if (!eventosPorCanal[channelId]) return false;
+
+  const originalLength = eventosPorCanal[channelId].length;
+  eventosPorCanal[channelId] = eventosPorCanal[channelId].filter(e => e.nome !== nomeBoss);
+
+  return eventosPorCanal[channelId].length < originalLength;
+}
+
+export { salvarEventos, carregarEventos, limparEventos, eventosPorCanal, removerEventoEspecifico };

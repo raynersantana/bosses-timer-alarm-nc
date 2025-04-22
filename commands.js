@@ -62,6 +62,20 @@ const LIMPAR_BOSSES = {
   type: 1
 };
 
-const ALL_COMMANDS = [TEST_COMMAND, CHALLENGE_COMMAND, COMMAND, CONSULTAR_BOSSES, LIMPAR_BOSSES];
+const REMOVER_BOSS = {
+  name: 'remover_boss',
+  description: 'Remove um boss específico da lista',
+  type: 1,
+  options: [
+    {
+      name: 'nome',
+      description: 'Nome do boss que deseja remover',
+      type: 3, // STRING
+      required: true,
+    },
+  ],
+}
+
+const ALL_COMMANDS = [TEST_COMMAND, CHALLENGE_COMMAND, COMMAND, CONSULTAR_BOSSES, LIMPAR_BOSSES, REMOVER_BOSS];
 
 InstallGlobalCommands(process.env.APP_ID, process.env.GUILD_ID, ALL_COMMANDS);
